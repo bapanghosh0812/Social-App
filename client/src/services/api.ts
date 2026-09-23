@@ -47,6 +47,8 @@ export function clearToken(): void {
   }
 }
 
+const SERVER_UNREACHABLE = "Can't reach the College Campus server. Check your connection and try again.";
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -95,7 +97,7 @@ class ApiClient {
     try {
       response = await fetch(`${API_BASE}${endpoint}`, { ...init, headers });
     } catch {
-      throw new ApiError('Network error. Check your connection and try again.', 0);
+      throw new ApiError(SERVER_UNREACHABLE, 0, 'API_UNREACHABLE');
     }
 
     let data: any = null;
@@ -104,6 +106,9 @@ class ApiClient {
     } catch {
       /* non-JSON response */
     }
+    // Every API reply is JSON. HTML or an empty body means we reached a static
+    // host (e.g. a web-only deploy) or a proxy error page, not the API.
+    if (data === null) throw new ApiError(SERVER_UNREACHABLE, 0, 'API_UNREACHABLE');
 
     if (!response.ok) {
       if (response.status === 401 && token) {

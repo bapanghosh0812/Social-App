@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight, Sparkles, ShieldCheck, Clapperboard, MessageCircle, Radio, ArrowLeft, KeyRound } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight, Sparkles, ShieldCheck, Clapperboard, MessageCircle, Radio, ArrowLeft, KeyRound, WifiOff } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useAppStore } from '../../store/useAppStore.js';
 import { api } from '../../services/api.js';
@@ -16,7 +16,7 @@ declare global {
 }
 
 export const LoginScreen: React.FC = () => {
-  const { login, register, loginDemo, loginWithGoogle, applySession, config } = useAuthStore();
+  const { login, register, loginDemo, loginWithGoogle, applySession, config, serverDown } = useAuthStore();
   const { addToast } = useAppStore();
   const resetToken = useRef<string | null>(new URLSearchParams(window.location.search).get('reset'));
 
@@ -137,6 +137,16 @@ export const LoginScreen: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {serverDown && (
+            <div role="alert" className="flex items-center gap-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-ink2">
+              <WifiOff className="h-4 w-4 shrink-0 text-danger" />
+              <span className="flex-1">The server isn't reachable right now, so sign-in won't work yet.</span>
+              <button onClick={() => window.location.reload()} className="shrink-0 font-semibold text-brand hover:underline">
+                Retry
+              </button>
+            </div>
+          )}
 
           <div className="space-y-5 rounded-4xl border border-line bg-elev p-6 shadow-lift">
             {(mode === 'login' || mode === 'signup') && (

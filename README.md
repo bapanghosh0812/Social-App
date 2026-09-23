@@ -89,6 +89,7 @@ The full list with explanations is in [server/.env.example](server/.env.example)
 
 ## Deploy
 
+- **Netlify (web app) + Render (API):** [netlify.toml](netlify.toml) builds the `client/` folder. [render.yaml](render.yaml) runs the API. Set `VITE_API_ORIGIN` on Netlify to the Render URL, and set `APP_URL` / `CORS_ORIGINS` on Render to the Netlify URL.
 - **Docker (one server):** `docker compose up --build -d` builds the API and an nginx web server on port 80.
 - **AWS step by step:** [deploy-aws.md](deploy-aws.md)
 - **Kubernetes:** `kubectl apply -f k8s/` (secrets come from a `campus-secrets` Secret)

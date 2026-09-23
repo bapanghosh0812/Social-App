@@ -23,6 +23,8 @@ const safeSet = (k: string, v: string) => {
 interface AuthState {
   user: User | null;
   config: AuthConfig | null;
+  /** True when the API could not be reached at startup. */
+  serverDown: boolean;
   isLoading: boolean;
   isTermsAccepted: boolean;
   isOnboardingOpen: boolean;
@@ -56,6 +58,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   config: null,
+  serverDown: false,
   isLoading: true,
   isTermsAccepted: safeGet(TERMS_KEY) === 'true',
   isOnboardingOpen: false,
@@ -66,8 +69,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
     api
       .authConfig()
-      .then((c) => set({ config: c }))
-      .catch(() => set({ config: { demoMode: false, googleClientId: null, passwordReset: true, emailDelivery: false, adminConsole: false } }));
+      .then((c) => set({ config: c, serverDown: false }))
+      .catch(() =>
+        set({ serverDown: true, config: { demoMode: false, googleClientId: null, passwordReset: true, emailDelivery: false, adminConsole: false } })
+      );
     await get().fetchCurrentUser();
   },
 

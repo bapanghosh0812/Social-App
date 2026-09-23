@@ -1,0 +1,40 @@
+# Render blueprint for the College Campus API (Netlify hosts the web app).
+# Render dashboard → New → Blueprint → pick this repo. Fill in the values it asks for.
+services:
+  - type: web
+    name: college-campus-api
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    region: singapore
+    # Free instances sleep when idle and lose their files on restart — fine for a
+    # demo (DEMO_MODE re-seeds it). For real users switch to "starter" and
+    # uncomment the disk so the database survives restarts.
+    plan: free
+    # disk:
+    #   name: campus-data
+    #   mountPath: /app/data
+    #   sizeGB: 5
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_DIR
+        value: /app/data
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OWNER_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"
+      # Your Netlify address, e.g. https://college-campus.netlify.app
+      - key: APP_URL
+        sync: false
+      # Same Netlify address (add more, comma-separated, e.g. capacitor://localhost,https://localhost)
+      - key: CORS_ORIGINS
+        sync: false
+      # Accounts allowed into the admin console, and its 6-digit PIN
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_PIN
+        sync: false
