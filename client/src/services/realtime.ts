@@ -15,10 +15,30 @@ class RealtimeClient {
   private heartbeat: number | null = null;
   private wanted = false;
   private queue: unknown[] = [];
+  private local: Handler | null = null;
   ready = false;
+
+  /** Offline preview: events come from the in-page demo server instead of a socket. */
+  useLocal(handler: Handler | null) {
+    this.local = handler;
+    this.ready = false;
+  }
+
+  /** Deliver an event produced in the page (offline preview). */
+  emitLocal(msg: { type: string }) {
+    this.emit(msg.type, msg);
+    this.emit('*', msg);
+  }
 
   connect() {
     this.wanted = true;
+    if (this.local) {
+      if (!this.ready) {
+        this.ready = true;
+        window.setTimeout(() => this.emitLocal({ type: 'READY' }), 0);
+      }
+      return;
+    }
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
     const token = getToken();
     if (!token) return;
@@ -72,6 +92,7 @@ class RealtimeClient {
 
   /** Send now if authenticated, otherwise queue until the connection is ready. */
   send(msg: unknown) {
+    if (this.local) return this.local(msg);
     if (this.ws && this.ready && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(msg));
     } else {

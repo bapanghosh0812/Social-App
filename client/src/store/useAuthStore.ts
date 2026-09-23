@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { User, Gender } from '../types/index.js';
-import { api, setToken, clearToken, getToken, setUnauthorizedHandler, type AuthConfig, type AuthResult } from '../services/api.js';
+import { api, setToken, clearToken, getToken, setUnauthorizedHandler, isPreview, startPreview, stopPreview, type AuthConfig, type AuthResult } from '../services/api.js';
 import { realtime } from '../services/realtime.js';
 
 const TERMS_KEY = 'cc_terms_accepted';
@@ -55,6 +55,15 @@ interface AuthState {
   updateLocalUser: (updates: Partial<User>) => void;
 }
 
+const OFFLINE_CONFIG: AuthConfig = { demoMode: false, googleClientId: null, passwordReset: true, emailDelivery: false, adminConsole: false };
+
+function loadConfig(set: (s: Partial<AuthState>) => void) {
+  api
+    .authConfig()
+    .then((c) => set({ config: c, serverDown: false }))
+    .catch(() => set({ config: OFFLINE_CONFIG, serverDown: true }));
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   config: null,
@@ -67,12 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setUnauthorizedHandler(() => {
       if (get().user) get().logout();
     });
-    api
-      .authConfig()
-      .then((c) => set({ config: c, serverDown: false }))
-      .catch(() =>
-        set({ serverDown: true, config: { demoMode: false, googleClientId: null, passwordReset: true, emailDelivery: false, adminConsole: false } })
-      );
+    loadConfig(set);
     await get().fetchCurrentUser();
   },
 
@@ -113,7 +117,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     get().applySession(res);
   },
   loginDemo: async () => {
-    const res = await api.demoLogin();
+    // No server connected (e.g. a web-only deploy): run the demo in the browser.
+    const res = get().serverDown ? await startPreview() : await api.demoLogin();
     get().acceptTerms();
     get().applySession(res);
   },
@@ -132,6 +137,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     realtime.disconnect();
     clearToken();
     set({ user: null, isOnboardingOpen: false });
+    if (isPreview()) {
+      stopPreview();
+      loadConfig(set);
+    }
   },
 
   updateLocalUser: (updates) => {

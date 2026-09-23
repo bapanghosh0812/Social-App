@@ -25,6 +25,35 @@ export function mediaUrl(url?: string | null): string {
   return url;
 }
 
+// --- Offline preview (runs the demo campus in the browser when no server is connected) ---
+const PREVIEW_KEY = 'cc_preview';
+let previewModule: Promise<typeof import('../demo/previewServer.js')> | null = null;
+const loadPreview = () => (previewModule ||= import('../demo/previewServer.js'));
+
+export function isPreview(): boolean {
+  try {
+    return localStorage.getItem(PREVIEW_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+export async function startPreview(): Promise<AuthResult> {
+  try {
+    localStorage.setItem(PREVIEW_KEY, '1');
+  } catch {
+    /* storage unavailable — preview lasts for this page only */
+  }
+  return (await loadPreview()).session() as AuthResult;
+}
+export function stopPreview(): void {
+  try {
+    localStorage.removeItem(PREVIEW_KEY);
+  } catch {
+    /* ignore */
+  }
+  previewModule?.then((m) => m.stop());
+}
+
 export function getToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY);
@@ -87,6 +116,15 @@ export function setUnauthorizedHandler(fn: () => void) {
 class ApiClient {
   private async request<T = Json>(endpoint: string, options: RequestInit & { adminPin?: string } = {}): Promise<T> {
     const { adminPin, ...init } = options;
+    if (isPreview()) {
+      const preview = await loadPreview();
+      try {
+        const body = typeof init.body === 'string' ? JSON.parse(init.body) : undefined;
+        return (await preview.handle(init.method || 'GET', endpoint, body, adminPin)) as T;
+      } catch (err: any) {
+        throw new ApiError(err?.message || 'Something went wrong.', err?.status || 500);
+      }
+    }
     const headers: Record<string, string> = { ...(init.headers as Record<string, string> | undefined) };
     if (init.body && !(init.body instanceof FormData)) headers['Content-Type'] = 'application/json';
     const token = getToken();
@@ -508,6 +546,19 @@ class ApiClient {
     onProgress?: (fraction: number) => void,
     fileName = 'upload'
   ): Promise<{ success: boolean; url: string; kind: 'image' | 'video' | 'pdf' }> {
+    if (isPreview()) {
+      return loadPreview().then(async (preview) => {
+        for (const f of [0.35, 0.7, 1]) {
+          await new Promise((r) => setTimeout(r, 150));
+          onProgress?.(f);
+        }
+        try {
+          return preview.registerUpload(file);
+        } catch (err: any) {
+          throw new ApiError(err?.message || 'Upload failed.', 400);
+        }
+      });
+    }
     return new Promise((resolve, reject) => {
       const form = new FormData();
       form.append('folder', folder);

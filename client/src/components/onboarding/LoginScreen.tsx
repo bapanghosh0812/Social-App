@@ -139,9 +139,11 @@ export const LoginScreen: React.FC = () => {
           </div>
 
           {serverDown && (
-            <div role="alert" className="flex items-center gap-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-ink2">
-              <WifiOff className="h-4 w-4 shrink-0 text-danger" />
-              <span className="flex-1">The server isn't reachable right now, so sign-in won't work yet.</span>
+            <div role="status" className="flex items-center gap-3 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-[13px] text-ink2">
+              <WifiOff className="h-4 w-4 shrink-0 text-gold2" />
+              <span className="flex-1">
+                Server not connected yet — sign-in is paused. Tap <strong className="text-ink">Try the live demo</strong> to explore the full app.
+              </span>
               <button onClick={() => window.location.reload()} className="shrink-0 font-semibold text-brand hover:underline">
                 Retry
               </button>
@@ -233,7 +235,7 @@ export const LoginScreen: React.FC = () => {
             )}
           </div>
 
-          {config?.demoMode && (mode === 'login' || mode === 'signup') && (
+          {(config?.demoMode || serverDown) && (mode === 'login' || mode === 'signup') && (
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={tryDemo}
