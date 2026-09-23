@@ -1,0 +1,43 @@
+# Production-style local stack: API + web app.
+# Secrets are read from server/.env (git-ignored) — never put them in this file.
+#   cp server/.env.example server/.env   # then fill in real values
+#   docker compose up --build -d
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: college_campus_server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_DIR: /app/data
+    volumes:
+      - campus_data:/app/data
+    expose:
+      - "5000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: college_campus_client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  campus_data:

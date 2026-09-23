@@ -1,0 +1,30 @@
+{
+  "appId": "com.collegecampus.app",
+  "appName": "College Campus",
+  "webDir": "client/dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#FFFFFF",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#FFFFFF"
+    },
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "Camera": {},
+    "Keyboard": {
+      "resize": "body"
+    }
+  }
+}

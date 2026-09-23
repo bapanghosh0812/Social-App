@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * College Campus design tokens — taken from the logo: royal navy + gold on white.
+ *  brand : primary actions & links (navy on light, gold on dark)
+ *  gold  : true-gold accent (verified seal, rings, the word "CAMPUS")
+ * Colors are RGB triplets so Tailwind opacity modifiers work (bg-brand/20).
+ */
+@layer base {
+  :root {
+    --bg: 255 255 255;
+    --elev: 255 255 255;
+    --elev-2: 247 248 250;
+    --sunken: 243 245 248;
+    --ink: 15 23 42;
+    --ink-2: 71 85 105;
+    --ink-3: 125 136 153;
+    --brand: 23 42 94;
+    --brand-2: 58 88 170;
+    --on-brand: 255 255 255;
+    --gold: 184 140 60;
+    --gold-2: 214 178 108;
+    --danger: 205 50 60;
+    --success: 22 140 88;
+    --info: 37 99 200;
+    --line: rgba(15, 23, 42, 0.09);
+    --line-strong: rgba(15, 23, 42, 0.16);
+    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 18px -10px rgba(15, 23, 42, 0.12);
+    --shadow-lift: 0 18px 50px -18px rgba(15, 23, 42, 0.28);
+    --shadow-brand: 0 10px 26px -12px rgba(23, 42, 94, 0.55);
+    --brand-grad: linear-gradient(135deg, #2B4796 0%, #1B3272 45%, #121F4A 100%);
+    --brand-text-grad: linear-gradient(100deg, #1B3272 0%, #2B4796 100%);
+    --glass: rgba(255, 255, 255, 0.86);
+    --ambient: none;
+    --app-h: 100dvh;
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg: 11 11 14;
+    --elev: 20 20 24;
+    --elev-2: 27 27 32;
+    --sunken: 15 15 19;
+    --ink: 244 239 230;
+    --ink-2: 179 170 156;
+    --ink-3: 125 118 107;
+    --brand: 216 180 106;
+    --brand-2: 240 211 154;
+    --on-brand: 23 18 10;
+    --gold: 216 180 106;
+    --gold-2: 240 211 154;
+    --danger: 239 99 90;
+    --success: 74 196 128;
+    --info: 110 156 255;
+    --line: rgba(255, 255, 255, 0.07);
+    --line-strong: rgba(255, 255, 255, 0.13);
+    --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 30px -16px rgba(0, 0, 0, 0.7);
+    --shadow-lift: 0 24px 60px -20px rgba(0, 0, 0, 0.85);
+    --shadow-brand: 0 10px 30px -10px rgba(216, 180, 106, 0.55);
+    --brand-grad: linear-gradient(135deg, #F3DDA7 0%, #D8B46A 45%, #A8842F 100%);
+    --brand-text-grad: linear-gradient(100deg, #F6E3B4 0%, #D8B46A 40%, #B8913F 100%);
+    --glass: rgba(14, 14, 18, 0.72);
+    --ambient: radial-gradient(1100px 520px at 50% -200px, rgba(216, 180, 106, 0.14), transparent 70%);
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    background-color: rgb(var(--bg));
+    background-image: var(--ambient);
+    background-attachment: fixed;
+    color: rgb(var(--ink));
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(button, a, input, textarea, select, [role='button']):focus-visible {
+    outline: 2px solid rgb(var(--brand) / 0.7);
+    outline-offset: 2px;
+    border-radius: 0.75rem;
+  }
+
+  ::selection {
+    background: rgb(var(--brand) / 0.25);
+  }
+
+  input,
+  textarea,
+  select {
+    color: rgb(var(--ink));
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--ink-3));
+  }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--ink-3) / 0.35);
+  border-radius: 9999px;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer components {
+  .card {
+    @apply bg-elev border border-line rounded-3xl shadow-card;
+  }
+  .glass {
+    background: var(--glass);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+  }
+  .brand-text {
+    @apply bg-brand-text bg-clip-text text-transparent;
+  }
+  .hairline {
+    @apply border-line;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-line bg-sunken px-4 py-3 text-sm outline-none transition-colors placeholder:text-ink3 focus:border-brand/60 focus:bg-elev;
+  }
+  .label {
+    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-ink3;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-elev px-3 py-1.5 text-xs font-medium text-ink2 transition-colors hover:border-line2 hover:text-ink;
+  }
+  .chip-active {
+    @apply border-brand/50 bg-brand/10 text-brand;
+  }
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgb(var(--ink-3) / 0.12);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(var(--ink) / 0.06), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+  .story-ring {
+    @apply rounded-full bg-ring-grad p-[2.5px];
+  }
+  .story-ring-seen {
+    @apply rounded-full p-[2.5px];
+    background: rgb(var(--ink-3) / 0.35);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Double-tap heart burst */
+@keyframes heart-pop {
+  0% {
+    transform: scale(0.2) rotate(-12deg);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.25) rotate(4deg);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(0.95) rotate(0deg);
+  }
+  45%,
+  75% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4) translateY(-40px);
+    opacity: 0;
+  }
+}
+.animate-heart-pop {
+  animation: heart-pop 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes like-bounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-like {
+  animation: like-bounce 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Reels progress + marquee */
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* Hashtag / mention links inside captions */
+.rich a,
+.rich button.tag {
+  color: rgb(var(--brand));
+  font-weight: 600;
+}

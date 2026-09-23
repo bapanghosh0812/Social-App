@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: campus-data
+  namespace: campus-prod
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: college-campus-deployment
+  namespace: campus-prod
+  labels:
+    app: college-campus
+    tier: api
+spec:
+  # The API keeps its database (SQLite) on the volume below, so it runs as a
+  # single replica. Put media on S3 (AWS_* settings) to keep the pod light.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: college-campus
+  template:
+    metadata:
+      labels:
+        app: college-campus
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: campus-api
+        image: collegecampus/api:v1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          name: http
+        # Secrets (JWT_SECRET, ADMIN_PIN, OWNER_SECRET, AWS keys, SMTP...) live in a
+        # Kubernetes Secret, never in this file:
+        #   kubectl -n campus-prod create secret generic campus-secrets --from-env-file=server/.env
+        envFrom:
+        - secretRef:
+            name: campus-secrets
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5000"
+        - name: DB_DIR
+          value: "/app/data"
+        - name: LOG_LEVEL
+          value: "info"
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        - name: tmp
+          mountPath: /tmp
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: campus-data
+      - name: tmp
+        emptyDir: {}

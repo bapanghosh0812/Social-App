@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+*.tsbuildinfo
+
+# Secrets & environment — never commit real credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+.aws/
+credentials
+credentials.json
+service-account*.json
+secrets/
+
+# Local database & uploads (runtime data)
+data/
+**/data/
+uploads/
+**/uploads/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+.jwt_secret
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS / editor / local tooling
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+*.swp
+
+# Native mobile
+android/
+ios/
+.gradle/
+
+# Vite / cache
+.vite/
+**/.vite/
+.cache/
